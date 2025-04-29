@@ -34,8 +34,7 @@
     "prepare": "husky install",
     "pre-commit": "lint-staged",
     "test": "run-p test:*",
-    "test:prettier": "prettier '**/*.{js,jsx,ts,tsx}' --check",
-    "postinstall": "npm run build"
+    "test:prettier": "prettier '**/*.{js,jsx,ts,tsx}' --check"
   },
   "dependencies": {
     "cac": "^6.7.14",
