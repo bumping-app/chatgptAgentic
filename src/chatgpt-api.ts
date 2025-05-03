@@ -202,7 +202,7 @@ export class ChatGPTAPI {
         }
 
         if (this._debug) {
-          console.log(`sendMessage (${numTokens} tokens)`, body)
+          console.log(`sendMessage (${numTokens} tokens)`, JSON.stringify(body))
         }
 
         if (stream) {
@@ -378,9 +378,7 @@ export class ChatGPTAPI {
 
     const systemMessageOffset = messages.length
 
-    let nextMessages = text
-      ? messages.concat(text)
-      : messages
+    let nextMessages = text ? messages.concat(text) : messages
 
     // let nextMessages = text
     //   ? messages.concat([
@@ -391,8 +389,6 @@ export class ChatGPTAPI {
     //       }
     //     ])
     //   : messages
-
-
 
     let numTokens = 0
 
@@ -430,30 +426,63 @@ export class ChatGPTAPI {
 
       let parentMessage = await this._getMessageById(parentMessageId)
       if (!parentMessage) {
-        break;
-      } else if (this._completionParams?.model !== 'gpt-4-vision-preview' && this._completionParams?.model !== 'gpt-4o') {
-        const parentText = parentMessage.text;
+        break
+      } else if (
+        this._completionParams?.model !== 'gpt-4-vision-preview' &&
+        this._completionParams?.model !== 'gpt-4o'
+      ) {
+        const parentText = parentMessage.text
         if (Array.isArray(parentText)) {
           // Text is structured for gpt-4-vision
-          parentMessage.text = parentText.map((elem) => {if (elem.type === 'text') {return elem.text;} else {return '';}}).join(' ');
-          console.log('parentMessage formatted for non vision', parentMessage);
+          parentMessage.text = parentText
+            .map((elem) => {
+              if (elem.type === 'text') {
+                return elem.text
+              } else {
+                return ''
+              }
+            })
+            .join(' ')
+          console.log('parentMessage formatted for non vision', parentMessage)
         }
       }
 
-
-
       const parentMessageRole = parentMessage.role || 'user'
+      let parentMessageText = parentMessage.text
+      let parentMessageObj
+      if (typeof parentMessageText === 'string') {
+        parentMessageObj = [
+          {
+            role: parentMessageRole,
+            content: parentMessageText,
+            name: parentMessage.name
+          }
+        ]
+      } else {
+        parentMessageObj = parentMessageText
+      }
 
       nextMessages = nextMessages.slice(0, systemMessageOffset).concat([
-        {
-          role: parentMessageRole,
-          content: parentMessage.text,
-          name: parentMessage.name
-        },
+        ...parentMessageObj,
+        // {
+        //   role: parentMessageRole,
+        //   content: parentMessage.text,
+        //   name: parentMessage.name
+        // },
         ...nextMessages.slice(systemMessageOffset)
       ])
-
       parentMessageId = parentMessage.parentMessageId
+
+      // nextMessages = nextMessages.slice(0, systemMessageOffset).concat([
+      //   {
+      //     role: parentMessageRole,
+      //     content: parentMessage.text,
+      //     name: parentMessage.name
+      //   },
+      //   ...nextMessages.slice(systemMessageOffset)
+      // ])
+
+      // parentMessageId = parentMessage.parentMessageId
     } while (true)
 
     // Use up to 4096 tokens (prompt + response), but try to leave 1000 tokens
