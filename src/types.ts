@@ -318,7 +318,7 @@ export namespace openai {
      * @type {number}
      * @memberof CreateChatCompletionRequest
      */
-    max_tokens?: number
+    max_completion_tokens?: number
     /**
      * Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model\'s likelihood to talk about new topics.  [See more information about frequency and presence penalties.](/docs/api-reference/parameter-details)
      * @type {number}
@@ -343,6 +343,7 @@ export namespace openai {
      * @memberof CreateChatCompletionRequest
      */
     user?: string
+    reasoning_effort? : string
   }
   /**
    * @type CreateChatCompletionRequestStop
